@@ -2,8 +2,8 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
-from src.model_lib.MiniFASNet import (MiniFASNetV1, MiniFASNetV1SE,
-                                      MiniFASNetV2, MiniFASNetV2SE)
+from src.model.MiniFASNet import (MiniFASNetV1, MiniFASNetV1SE, MiniFASNetV2,
+                                  MiniFASNetV2SE)
 from src.utility import set_parameter_requires_grad
 
 

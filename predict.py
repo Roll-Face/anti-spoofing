@@ -1,7 +1,8 @@
 import argparse
 import os
-import warnings
 import time
+import warnings
+
 import cv2
 import numpy as np
 import pandas as pd
@@ -85,7 +86,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    print('Processing ... ')
+    print("Processing ... ")
     start_time = time.time()
     main(args)
     print("Save file")

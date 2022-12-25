@@ -9,8 +9,8 @@ from tqdm import tqdm
 
 from src.data.dataset_loader import get_train_loader, get_val_loader
 from src.method_evaluate import get_equal_error_rate, get_tp_fp_rates
-from src.model.MiniFASNet import (MiniFASNetV1, MiniFASNetV1SE,
-                                      MiniFASNetV2, MiniFASNetV2SE)
+from src.model.MiniFASNet import (MiniFASNetV1, MiniFASNetV1SE, MiniFASNetV2,
+                                  MiniFASNetV2SE)
 from src.model_lib.MultiFTNet import MultiFTNet
 
 warnings.filterwarnings("ignore")

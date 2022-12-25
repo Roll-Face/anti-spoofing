@@ -37,6 +37,10 @@ python src/generate_patches.py
 python train.py
 ```
 
+`Step 4: Demo`
+
+`python src/demo.py --model_dir ./resources/ckpt_onnx/ --input_data ./data/0.mp4`
+
 ### refers:
 
 - https://github.com/minivision-ai/Silent-Face-Anti-Spoofing/blob/master/README_EN.md

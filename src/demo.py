@@ -72,35 +72,54 @@ def predict(image, model_dir):
     label = np.argmax(prediction)
     score = prediction[0][label] / 2
     if label == 1:
-        return score
+        return label, image_bbox, score
     else:
-        return 1 - score
+        return label, image_bbox, (1 - score)
 
 
-def main(video_dir, model_dir):
-    target = {}
-    try:
-        for video_name in os.listdir(video_dir):
-            ls = []
-            count = 0
-            cap = cv2.VideoCapture(os.path.join(video_dir, video_name))
-            while True:
-                _, frame = cap.read()
-                try:
-                    if count % 5 == 0:
-                        score = predict(frame, model_dir)
-                        ls.append(score)
-                    count += 1
-                except:
-                    break
-            target[video_name] = sum(ls) / len(ls)
-        dataframe = pd.DataFrame(
-            list(target.items()), columns=["fname", "liveness_score"]
-        )
-        os.makedirs("/result", exist_ok=True)
-        dataframe.to_csv("/result/submission.csv", index=False)
-    except Exception as e:
-        print(f"Error {e}")
+def main(args):
+    cap = cv2.VideoCapture(args.input_data)
+    while True:
+        _, frame = cap.read()
+        try:
+            label, image_bbox, score = predict(frame, args.model_dir)
+            if label == 1:
+                cv2.rectangle(
+                    frame,
+                    (image_bbox[0], image_bbox[1]),
+                    (image_bbox[0] + image_bbox[2], image_bbox[1] + image_bbox[3]),
+                    (255, 0, 0),
+                    2,
+                )
+                cv2.putText(
+                    frame,
+                    "Real face",
+                    (image_bbox[0], image_bbox[1] - 5),
+                    cv2.FONT_HERSHEY_COMPLEX,
+                    0.5 * frame.shape[0] / 1024,
+                    (255, 0, 0),
+                )
+            else:
+                cv2.rectangle(
+                    frame,
+                    (image_bbox[0], image_bbox[1]),
+                    (image_bbox[0] + image_bbox[2], image_bbox[1] + image_bbox[3]),
+                    (0, 0, 255),
+                    2,
+                )
+                cv2.putText(
+                    frame,
+                    "Fake face",
+                    (image_bbox[0], image_bbox[1] - 5),
+                    cv2.FONT_HERSHEY_COMPLEX,
+                    0.5 * frame.shape[0] / 1024,
+                    (0, 0, 255),
+                )
+        except:
+            break
+        cv2.imshow("video", frame)
+        if cv2.waitKey(0) & 0xFF == ord("q"):
+            break
 
 
 if __name__ == "__main__":
@@ -112,14 +131,12 @@ if __name__ == "__main__":
         help="model_lib used to test",
     )
     parser.add_argument(
-        "--data",
+        "--input_data",
         type=str,
         help="image used to test",
-        default="./data/",
     )
     args = parser.parse_args()
-    print("Pre-Processing ... ")
     start_time = time.time()
-    main(video_dir=args.data, model_dir=args.model_dir)
-    print("output will be saved in /result/submission.csv")
+    print("Runing ...")
+    main(args)
     print(f"Time: {time.time() - start_time}")

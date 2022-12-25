@@ -14,7 +14,7 @@ import types
 
 import numpy as np
 
-from src.data_io import functional as F
+from src.data import functional as F
 
 __all__ = [
     "Compose",

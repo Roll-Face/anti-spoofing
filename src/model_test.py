@@ -7,8 +7,8 @@ import torch
 import torch.nn.functional as F
 
 from src.data import transform as trans
-from src.model.MiniFASNet import (MiniFASNetV1, MiniFASNetV1SE,
-                                      MiniFASNetV2, MiniFASNetV2SE)
+from src.model.MiniFASNet import (MiniFASNetV1, MiniFASNetV1SE, MiniFASNetV2,
+                                  MiniFASNetV2SE)
 from src.model.MultiFTNet import MultiFTNet
 from src.utility import get_kernel, parse_model_name
 
@@ -22,10 +22,8 @@ MODEL_MAPPING = {
 
 class Detection:
     def __init__(self):
-        caffemodel = (
-            "/code/resources/pre-trained/detection_model/Widerface-RetinaFace.caffemodel"
-        )
-        deploy = "/code/resources/pre-trained/detection_model/deploy.prototxt"
+        caffemodel = "G:/HN_LAP/anti-spoofing/resources/pre-trained/detection_model/Widerface-RetinaFace.caffemodel"
+        deploy = "G:/HN_LAP/anti-spoofing/resources/pre-trained/detection_model/deploy.prototxt"
         self.detector = cv2.dnn.readNetFromCaffe(deploy, caffemodel)
         self.detector_confidence = 0.6
 
