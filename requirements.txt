@@ -1,0 +1,10 @@
+opencv-python
+pandas
+numpy
+scikit-learn
+tqdm
+matplotlib
+torch
+onnxruntime
+onnxruntime-gpu
+facenet_pytorch
