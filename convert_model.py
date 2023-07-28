@@ -1,63 +1,40 @@
+import onnxruntime
 import torch
-from src.model.MiniFASNet import (MiniFASNetV1, MiniFASNetV1SE, MiniFASNetV2,
-                                  MiniFASNetV2SE)
-from src.model.MultiFTNet import MultiFTNet
-from src.utility import get_kernel
+from models.CDCNs import CDCNpp
 
-
-MODEL_MAPPING = {
-    "MiniFASNetV1": MiniFASNetV1,
-    "MiniFASNetV2": MiniFASNetV2,
-    "MiniFASNetV1SE": MiniFASNetV1SE,
-    "MiniFASNetV2SE": MiniFASNetV2SE,
-}
-
-
-def load_model(model_type,model_path,device):
-    model = MultiFTNet(
-        model_type=MODEL_MAPPING[model_type],
-        conv6_kernel=get_kernel(80, 80),
-        img_channel=3,
-        num_classes=2,
-        training=False,
-        pre_trained=None,
-    ).to(device)
-
-    state_dict = torch.load(model_path, map_location=device)
-    keys = iter(state_dict)
-    first_layer_name = keys.__next__()
-    if first_layer_name.find("module.") >= 0:
-        from collections import OrderedDict
-
-        new_state_dict = OrderedDict()
-        for key, value in state_dict.items():
-            name_key = key[7:]
-            new_state_dict[name_key] = value
-        model.load_state_dict(new_state_dict)
-    model.eval()
-
-    return model
-
-
+device = torch.device("cuda")
 def convert_ONNX(model, save_name):
-    x = torch.randn(1, 3, 80, 80, requires_grad=True).to(device)
+    model = model.to(device)
+    x = torch.randn(1, 3, 256, 256, requires_grad=True).to(device).float()
     torch.onnx.export(
         model,
         x,
         save_name,
         export_params=True,
         input_names=["input"],
-        output_names=["output"],
+        output_names=['map_x', 'x_concat', 'attention1', 'attention2', 'attention3', 'x_input'],
         dynamic_axes={
             "input": {0: "batch_size"},  # variable length axes
             "output": {0: "batch_size"},
         },
     )
 
+def load_model(ckpt_path):
+    model = CDCNpp()
+    ckpt = torch.load(ckpt_path,map_location=torch.device("cuda:0"))
+    model.load_state_dict(ckpt['state_dict'])
+    # model.eval()
+    return model
 
+       
 if __name__ == "__main__":
-    model_type = "MiniFASNetV2"
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model_path = "/home/namnh/Desktop/tests/anti-spoofing/fine_tuning/2.7_80x80_MiniFASNetV2_460.pth"
-    model = load_model(model_type=model_type,model_path=model_path,device=device)
-    convert_ONNX(model,"/home/namnh/Desktop/tests/anti-spoofing/fine_tuning/onnx/2.7_80x80_MiniFASNetV2.onnx")
+    # import os
+    # root_dir = "Pretrained_models"
+    # for model_name in os.listdir(root_dir):
+    #     model_path = os.path.join(root_dir,model_name)
+    #     model = load_model(ckpt_path=model_path)
+    #     name_model_onnx = model_name.split(".")[0]
+    #     convert_ONNX(model=model,save_name=os.path.join("pre_trained_onnx",f"{name_model_onnx}.onnx"))
+
+    model = load_model("experiments/output/88_CDCNpp_zalo.pth")
+    convert_ONNX(model,save_name="88_CDCNpp_zalo.onnx")
